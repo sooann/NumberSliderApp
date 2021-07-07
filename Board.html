@@ -1,11 +1,23 @@
 <html>
     <body>
-        <button id="btnStart">Start</button>
+        <button id="btnStart" onclick="start();">Start</button>&nbsp;&nbsp;&nbsp;
+        <button id="btnStop" onclick="stop();">Stop</button>
         <div id="divContent">
 
         </div>
     </body>
-    <script>
+    <script type="text/javascript" >
+
+        var posit = new Array();
+        var hgh = 4;            //height of board; 2-maxhgh
+        var wid = 4;            //width of board; 2-maxwid
+        var siz = 15;           //Number of tiles, = wid*hgh-1. Only have provision for 2-digit numbers on display
+        var blnkx,blnky;        //position of blank space
+        var mode = 0;           //0=normal  1=solving scrambled  2=edit  3=solving
+        var boardCount = 0;
+        var timeStart = 0;
+        var boardStore = new Array();
+
         function mix(){
             var i, j, c = 0;
             var pcs = new Array();
@@ -21,41 +33,102 @@
                     c++;
                 }
             }
-            mode = 1;
+            //mode = 1;
             filltwo();
         }
 
         function filltwo() {
-                //First fill in last two tiles.
-                var s1 = -1;
-                var s2 = -1;
-                for (var i = 0; i <= siz; i++) {
-                    if (posit[i] == -1) {
-                        if (s1 < 0) {
-                            s1 = i;
-                            posit[s1] = siz - 1;
-                        } else {
-                            s2 = i;
-                            posit[s2] = siz - 2;
-                            break;
-                        }
+            //First fill in last two tiles.
+            var s1 = -1;
+            var s2 = -1;
+            for (var i = 0; i <= siz; i++) {
+                if (posit[i] == -1) {
+                    if (s1 < 0) {
+                        s1 = i;
+                        posit[s1] = siz - 1;
+                    } else {
+                        s2 = i;
+                        posit[s2] = siz - 2;
+                        break;
                     }
-                }
-                //check permutation parity
-                var c = 0;
-                for (var i = 1; i <= siz; i++) {
-                    for (var j = 0; j < i; j++) {
-                        if (posit[j] > posit[i]) c++;
-                    }
-                }
-                //Check position of blank space; move to bottom right
-                c += (wid - 1) - blnkx + (hgh - 1) - blnky;
-
-                //if parity odd then swap
-                if (c & 1) {
-                    posit[s1] = siz - 2;
-                    posit[s2] = siz - 1;
                 }
             }
+            //check permutation parity
+            var c = 0;
+            for (var i = 1; i <= siz; i++) {
+                for (var j = 0; j < i; j++) {
+                    if (posit[j] > posit[i]) c++;
+                }
+            }
+            //Check position of blank space; move to bottom right
+            c += (wid - 1) - blnkx + (hgh - 1) - blnky;
+
+            //if parity odd then swap
+            if (c & 1) {
+                posit[s1] = siz - 2;
+                posit[s2] = siz - 1;
+            }
+        }
+
+        function GenerateBoard() {
+
+            var boardFound = false;
+            boardCount++;
+            mix();
+            alert (boardStore);
+            //check duplicate
+            if (boardStore.length>0) {
+                for (var i=0; i<=boardStore.length; i++) {
+                    for (var j=0; j<=siz; j++) {
+                        alert (posit[j]+","+boardStore[i][j]);
+                        if(posit[j]!=boardStore[i][j]) {
+                            break;
+                        }
+                        if (j==size) {
+                            boardFound=true;
+                        }
+                    }
+                    alert (boardFound);
+                    if (boardFound) {
+                        //break;
+                    }
+                }
+                alert("endfunc");
+            } 
+
+            if (!boardFound) {
+                boardStore.push(posit);
+                alert(boardStore);
+                displayBoard();
+            }
+
+            if (mode>=3) {
+                GenerateBoardTimer = setTimeout("GenerateBoard();",50);
+            }
+        }
+
+        function displayBoard() {
+            var timeElapse = new Date() - timeStart;
+            var htmlText = boardCount + " - ";
+            htmlText += "["+posit.toString()+"]<br />";
+            htmlText += "Time: " + timeElapse + ", Mode: "+mode+"<br />";
+            document.getElementById("divContent").innerHTML+=htmlText;
+        }
+
+        var GenerateBoardTimer;
+        function start() {
+            boardCount=0;  
+            timeStart = new Date();
+            boardStore = new Array();
+            mode=3; //start random block
+            GenerateBoardTimer = setTimeout("GenerateBoard();",50);
+        }
+
+        function stop() {
+            mode=0;
+            clearTimeout(GenerateBoardTimer);
+        }
+
+
     </script>
 </html>
