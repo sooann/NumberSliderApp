@@ -1,17 +1,16 @@
 <html>
     <body>
         <button id="btnStart" onclick="start();">Start</button>&nbsp;&nbsp;&nbsp;
-        <button id="btnStop" onclick="stop();">Stop</button>
-        <div id="divContent">
-
-        </div>
+        <button id="btnStop" onclick="stop();">Stop</button><br />
+        <div id="divContentRunning" style="float:left;padding:3px;"></div>
+        <div id="divDup" style="float:left;padding:3px;"></div>
     </body>
     <script type="text/javascript" >
 
         var posit = new Array();
-        var hgh = 4;            //height of board; 2-maxhgh
-        var wid = 4;            //width of board; 2-maxwid
-        var siz = 15;           //Number of tiles, = wid*hgh-1. Only have provision for 2-digit numbers on display
+        var hgh = 3;            //height of board; 2-maxhgh
+        var wid = 3;            //width of board; 2-maxwid
+        var siz = 8;           //Number of tiles, = wid*hgh-1. Only have provision for 2-digit numbers on display
         var blnkx,blnky;        //position of blank space
         var mode = 0;           //0=normal  1=solving scrambled  2=edit  3=solving
         var boardCount = 0;
@@ -75,44 +74,41 @@
             var boardFound = false;
             boardCount++;
             mix();
-            alert (boardStore);
+            
             //check duplicate
             if (boardStore.length>0) {
                 for (var i=0; i<=boardStore.length; i++) {
-                    for (var j=0; j<=siz; j++) {
-                        alert (posit[j]+","+boardStore[i][j]);
-                        if(posit[j]!=boardStore[i][j]) {
-                            break;
-                        }
-                        if (j==size) {
-                            boardFound=true;
-                        }
-                    }
-                    alert (boardFound);
-                    if (boardFound) {
-                        //break;
-                    }
+                    if(posit.toString()==boardStore[i]) {
+                        boardFound=true;
+                    }   
                 }
-                alert("endfunc");
             } 
 
             if (!boardFound) {
-                boardStore.push(posit);
-                alert(boardStore);
-                displayBoard();
+                boardStore.push(posit.toString());
+                //displayBoard();
+                if ((boardCount % 1000)==0) {
+                    displayBoard();
+                }
+            } else {
+                //displayBoard("divDup");
             }
 
             if (mode>=3) {
-                GenerateBoardTimer = setTimeout("GenerateBoard();",50);
+                GenerateBoardTimer = setTimeout("GenerateBoard();",10);
             }
         }
 
-        function displayBoard() {
+        function displayBoard(divId) {
+            if (divId==undefined) {
+                divId = "divContentRunning";
+            }
             var timeElapse = new Date() - timeStart;
+            var Content = document.getElementById(divId).innerHTML;
             var htmlText = boardCount + " - ";
             htmlText += "["+posit.toString()+"]<br />";
-            htmlText += "Time: " + timeElapse + ", Mode: "+mode+"<br />";
-            document.getElementById("divContent").innerHTML+=htmlText;
+            htmlText += "Time: " + timeElapse + ", Unique: "+boardStore.length+"<br />" + Content;
+            document.getElementById(divId).innerHTML=htmlText;
         }
 
         var GenerateBoardTimer;
@@ -121,7 +117,7 @@
             timeStart = new Date();
             boardStore = new Array();
             mode=3; //start random block
-            GenerateBoardTimer = setTimeout("GenerateBoard();",50);
+            GenerateBoardTimer = setTimeout("GenerateBoard();",10);
         }
 
         function stop() {
